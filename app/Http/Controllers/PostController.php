@@ -8,6 +8,7 @@ use App\Models\Post;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
@@ -19,6 +20,9 @@ class PostController extends Controller
     {
         $user = auth()->user();
 
+        // --- use for debug the ORM query to SQL --- //
+        // DB::enableQueryLog();
+
         $query =  Post::with(['user', 'media'])
             ->where('published_at', '<=', now())
             ->withCount('claps')
@@ -28,7 +32,10 @@ class PostController extends Controller
             $query->whereIn('user_id', $ids);
         }
 
+        // print_r($query->toSql());
+        // exit;
         $posts = $query->simplePaginate(5, ['*'],'post_page');
+        // dd(DB::getQueryLog());
         return view('post.index', [
             'posts' => $posts,
         ]);
